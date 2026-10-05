@@ -89,6 +89,9 @@ DATABASES = {
             "transaction_mode": "IMMEDIATE",
             "timeout": 20,
         },
+        # A file (not in-memory) test database, so the concurrency test can
+        # exercise real SQLite locking across several connections.
+        "TEST": {"NAME": str(BASE_DIR / "test_db.sqlite3")},
     }
 }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

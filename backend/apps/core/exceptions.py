@@ -18,6 +18,26 @@ class DomainError(Exception):
         super().__init__(self.message)
 
 
+class ValidationFailed(DomainError):
+    """A business rule about input failed; ``fields`` says which inputs."""
+
+    code = "VALIDATION_ERROR"
+    message = "Some details need fixing before we can continue."
+    status_code = 400
+
+
+class AdminOnly(DomainError):
+    code = "ADMIN_ONLY"
+    message = "Only administrators can do this."
+    status_code = 403
+
+
+class OrganiserOnly(DomainError):
+    code = "ORGANISER_ONLY"
+    message = "Switch to an organiser to manage events."
+    status_code = 403
+
+
 class ServiceUnavailable(DomainError):
     code = "SERVICE_UNAVAILABLE"
     message = "The service is temporarily unavailable. Please try again shortly."
