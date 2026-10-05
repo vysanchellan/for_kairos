@@ -72,7 +72,7 @@ export const Textarea = forwardRef<
     <textarea
       ref={ref}
       aria-invalid={invalid || undefined}
-      className={cn(control, "min-h-32 resize-y py-2.5 leading-relaxed", invalid ? "border-danger" : "border-border", className)}
+      className={cn(control, "resize-y py-2.5 leading-relaxed", invalid ? "border-danger" : "border-border", className)}
       {...props}
     />
   );

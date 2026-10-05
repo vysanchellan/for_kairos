@@ -23,8 +23,10 @@ export function RoleAvatar({ role, className }: { role: Role; className?: string
   );
 }
 
-const item =
-  "flex cursor-default items-start gap-3 rounded-md px-2.5 py-2 text-sm outline-none data-[highlighted]:bg-surface-muted";
+const itemBase = "flex cursor-default gap-3 rounded-md px-2.5 text-sm outline-none data-[highlighted]:bg-surface-muted";
+const item = `${itemBase} items-start py-2`;
+const subItem = `${itemBase} ml-11 items-center py-1.5`;
+const plainItem = `${itemBase} items-center py-2 text-fg-muted`;
 
 /** The "Viewing as" control. It's first-class because the whole demo revolves around roles. */
 export function RoleSwitcher() {
@@ -37,7 +39,7 @@ export function RoleSwitcher() {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
-        className="group flex h-11 max-w-[15rem] items-center gap-2 rounded-full border border-border bg-surface py-1 pl-1 pr-2.5 text-left shadow-xs transition-colors hover:border-border-strong sm:h-10"
+        className="group flex h-11 min-w-0 max-w-[10.5rem] items-center gap-2 sm:max-w-[15rem] rounded-full border border-border bg-surface py-1 pl-1 pr-2.5 text-left shadow-xs transition-colors hover:border-border-strong sm:h-10"
         aria-label={`Viewing as ${name}. Change role`}
       >
         <RoleAvatar role={viewer.role} className="size-8" />
@@ -80,7 +82,7 @@ export function RoleSwitcher() {
               return (
                 <DropdownMenu.Item
                   key={org.id}
-                  className={cn(item, "ml-11 items-center py-1.5")}
+                  className={subItem}
                   onSelect={() => switchTo({ role: "organiser", organiserId: org.id })}
                 >
                   <span className="min-w-0 flex-1">
@@ -93,13 +95,13 @@ export function RoleSwitcher() {
             })}
           </DropdownMenu.Group>
 
-          <DropdownMenu.Item className={cn(item, "mt-1")} onSelect={() => switchTo({ role: "admin", organiserId: null })}>
+          <DropdownMenu.Item className={`${item} mt-1`} onSelect={() => switchTo({ role: "admin", organiserId: null })}>
             <RoleAvatar role="admin" className="size-8" />
             <RoleText role="admin" active={viewer.role === "admin"} />
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator className="my-1.5 h-px bg-border" />
-          <DropdownMenu.Item className={cn(item, "items-center text-fg-muted")} onSelect={() => setIntroOpen(true)}>
+          <DropdownMenu.Item className={plainItem} onSelect={() => setIntroOpen(true)}>
             <CircleHelp className="ml-1.5 size-4" aria-hidden="true" />
             How do roles work?
           </DropdownMenu.Item>

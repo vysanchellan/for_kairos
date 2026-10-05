@@ -98,18 +98,20 @@ export function Layout() {
 
       <header className="sticky top-0 z-30 border-b border-border/80 bg-canvas/85 backdrop-blur-md supports-[backdrop-filter]:bg-canvas/70">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
-          <Logo />
+          <div className="shrink-0"><Logo /></div>
           <nav aria-label="Main" className="ml-4 hidden md:block">
             <NavItems role={viewer.role} />
           </nav>
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
             {viewer.role === "organiser" && (
-              <Button asChild variant="primary" size="sm" className="hidden sm:inline-flex">
-                <Link to="/organiser/events/new">
-                  <CalendarPlus className="size-4" aria-hidden="true" />
-                  New event
-                </Link>
-              </Button>
+              <span className="hidden sm:block">
+                <Button asChild variant="primary" size="sm">
+                  <Link to="/organiser/events/new">
+                    <CalendarPlus className="size-4" aria-hidden="true" />
+                    New event
+                  </Link>
+                </Button>
+              </span>
             )}
             <ThemeMenu />
             <RoleSwitcher />

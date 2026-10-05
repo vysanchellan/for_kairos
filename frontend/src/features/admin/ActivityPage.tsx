@@ -41,7 +41,7 @@ function ActivityPage() {
         value={kind}
         onValueChange={(v) => v && setKind(v as ActivityKind | "all")}
         aria-label="Filter activity"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0"
+        className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0"
       >
         {[["all", "Everything"] as const, ...Object.entries(KIND_META).map(([k, m]) => [k, m.label] as const)].map(
           ([value, label]) => (
@@ -63,13 +63,13 @@ function ActivityPage() {
             <ActivitySkeleton rows={8} />
           </LoadingRegion>
         ) : activity.isError ? (
-          <ErrorState error={activity.error} onRetry={() => void activity.refetch()} compact className="border-0 shadow-none" />
+          <ErrorState error={activity.error} onRetry={() => void activity.refetch()} compact plain />
         ) : entries.length === 0 ? (
           <EmptyState
             icon={<Activity />}
             title="Nothing here yet"
             description="When events are published or people register, it'll show up here."
-            className="border-0"
+            plain
           />
         ) : (
           <>

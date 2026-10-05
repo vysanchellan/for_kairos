@@ -65,7 +65,14 @@ function useStatusMutation(kind: "publish" | "reject") {
   });
 }
 
-export function PublishButton({ event, size = "sm" }: { event: CommunityEvent; size?: "sm" | "md" }) {
+interface ActionProps {
+  event: CommunityEvent;
+  size?: "sm" | "md";
+  /** Where focus goes after the dialog closes (the row may vanish from a filtered list). */
+  returnFocusTo?: string;
+}
+
+export function PublishButton({ event, size = "sm", returnFocusTo }: ActionProps) {
   const [open, setOpen] = useState(false);
   const publish = useStatusMutation("publish");
   return (
@@ -86,6 +93,7 @@ export function PublishButton({ event, size = "sm" }: { event: CommunityEvent; s
           </>
         }
         confirmLabel="Publish event"
+        returnFocusTo={returnFocusTo}
         onConfirm={() => publish.mutate({ event })}
       />
     </>
@@ -94,7 +102,7 @@ export function PublishButton({ event, size = "sm" }: { event: CommunityEvent; s
 
 const NOTE_MAX = 280;
 
-export function RequestChangesButton({ event, size = "sm" }: { event: CommunityEvent; size?: "sm" | "md" }) {
+export function RequestChangesButton({ event, size = "sm", returnFocusTo }: ActionProps) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   const reject = useStatusMutation("reject");
@@ -108,6 +116,7 @@ export function RequestChangesButton({ event, size = "sm" }: { event: CommunityE
         open={open}
         onOpenChange={setOpen}
         title="Request changes"
+        returnFocusTo={returnFocusTo}
         description={`“${event.title}” goes back to its organiser. They can edit it and resubmit it for review.`}
       >
         <form
@@ -131,7 +140,7 @@ export function RequestChangesButton({ event, size = "sm" }: { event: CommunityE
               maxLength={NOTE_MAX}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Add a venue and say who the session is for."
-              className="min-h-24"
+              rows={3}
             />
           </Field>
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

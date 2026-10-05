@@ -19,6 +19,8 @@ export function useEvent(id: string) {
   return useQuery({
     queryKey: queryKeys.event(id, viewerKey),
     queryFn: ({ signal }) => api.getEvent(id, signal),
+    // After a role switch, keep showing the same event while the new viewer's copy loads.
+    placeholderData: (previous) => (previous?.id === id ? previous : undefined),
   });
 }
 

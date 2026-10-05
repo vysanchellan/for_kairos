@@ -72,10 +72,10 @@ export default function DiscoverPage() {
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-sm font-medium text-accent-text">Community events near you</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="mt-2 text-[27px] font-semibold leading-tight tracking-tight sm:text-4xl">
               Find something good to do this week
             </h1>
-            <p className="mt-3 text-[15px] leading-relaxed text-fg-muted sm:text-base">
+            <p className="mt-3 text-sm leading-relaxed text-fg-muted sm:text-base">
               Repair cafés, open mics, sunrise yoga and more, all run by local groups. Register your interest in one
               tap, with no account needed.
             </p>
@@ -98,7 +98,7 @@ export default function DiscoverPage() {
             value={filters.category ?? "all"}
             onValueChange={(value) => update({ category: !value || value === "all" ? null : value })}
             aria-label="Filter by category"
-            className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:px-0 lg:pb-0"
+            className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:min-w-0 lg:flex-1 lg:flex-wrap lg:px-0 lg:pb-0"
           >
             {[{ value: "all", label: "All" }, ...CATEGORIES].map((category) => (
               <ToggleGroup.Item
@@ -115,8 +115,8 @@ export default function DiscoverPage() {
             ))}
           </ToggleGroup.Root>
 
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1 lg:w-60 lg:flex-none">
+          <div className="flex items-center gap-3 lg:shrink-0">
+            <div className="relative flex-1 lg:w-56 lg:flex-none">
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-fg-subtle"
                 aria-hidden="true"

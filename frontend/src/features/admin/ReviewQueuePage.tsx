@@ -68,7 +68,7 @@ function ReviewQueuePage() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section aria-labelledby="queue-heading" className="min-w-0">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 id="queue-heading" className="text-lg font-semibold">
+            <h2 id="queue-heading" tabIndex={-1} className="text-lg font-semibold focus:outline-none">
               {view === "queue" ? "Awaiting review" : "All events"}
             </h2>
             <ToggleGroup.Root
@@ -178,8 +178,8 @@ function ReviewRow({ event }: { event: CommunityEvent }) {
         </p>
         {pending && (
           <div className="flex flex-col-reverse gap-2 sm:flex-row">
-            <RequestChangesButton event={event} />
-            <PublishButton event={event} />
+            <RequestChangesButton event={event} returnFocusTo="queue-heading" />
+            <PublishButton event={event} returnFocusTo="queue-heading" />
           </div>
         )}
       </div>
@@ -205,7 +205,7 @@ function RecentActivity() {
         {activity.isPending ? (
           <ActivitySkeleton rows={4} />
         ) : activity.isError ? (
-          <ErrorState error={activity.error} onRetry={() => void activity.refetch()} compact className="shadow-none" />
+          <ErrorState error={activity.error} onRetry={() => void activity.refetch()} compact plain />
         ) : entries.length === 0 ? (
           <p className="text-sm text-fg-muted">Publishing and registrations will show up here.</p>
         ) : (

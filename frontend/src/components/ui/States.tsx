@@ -12,19 +12,20 @@ export function EmptyState({
   title,
   description,
   action,
-  className,
+  plain,
 }: {
   icon: ReactNode;
   title: string;
   description: string;
   action?: ReactNode;
-  className?: string;
+  /** No border, for use inside an existing card. */
+  plain?: boolean;
 }) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center rounded-xl border border-dashed border-border-strong bg-surface/60 px-6 py-12 text-center",
-        className,
+        "flex flex-col items-center rounded-xl px-6 py-12 text-center",
+        !plain && "border border-dashed border-border-strong bg-surface/60",
       )}
     >
       <div className="mb-4 grid size-12 place-items-center rounded-full bg-accent-soft text-accent-text [&>svg]:size-6">
@@ -41,13 +42,14 @@ export function EmptyState({
 export function ErrorState({
   error,
   onRetry,
-  className,
   compact,
+  plain,
 }: {
   error: unknown;
   onRetry?: () => void;
-  className?: string;
   compact?: boolean;
+  /** No border or shadow, for use inside an existing card. */
+  plain?: boolean;
 }) {
   const friendly = toFriendlyError(error);
   const requestId = requestIdOf(error);
@@ -58,9 +60,9 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        "flex flex-col items-center rounded-xl border border-border bg-surface text-center shadow-card",
+        "flex flex-col items-center rounded-xl text-center",
+        !plain && "border border-border bg-surface shadow-card",
         compact ? "px-5 py-8" : "px-6 py-14",
-        className,
       )}
     >
       <div className="mb-4 grid size-12 place-items-center rounded-full bg-danger-soft text-danger">

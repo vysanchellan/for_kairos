@@ -15,6 +15,17 @@ const overlay =
 const panel =
   "fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-surface p-6 shadow-pop focus:outline-none data-[state=open]:animate-[dialog-in_200ms_cubic-bezier(0.22,1,0.36,1)]";
 
+function focusTarget(id?: string) {
+  if (!id) return undefined;
+  return (event: Event) => {
+    const target = document.getElementById(id);
+    if (target) {
+      event.preventDefault();
+      target.focus();
+    }
+  };
+}
+
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -25,6 +36,7 @@ export function ConfirmDialog({
   onConfirm,
   tone = "primary",
   icon,
+  returnFocusTo,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -35,12 +47,14 @@ export function ConfirmDialog({
   onConfirm: () => void;
   tone?: "primary" | "danger" | "success";
   icon?: ReactNode;
+  /** Element id to focus on close, for when the trigger is about to disappear. */
+  returnFocusTo?: string;
 }) {
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className={overlay} />
-        <AlertDialog.Content className={panel}>
+        <AlertDialog.Content className={panel} onCloseAutoFocus={focusTarget(returnFocusTo)}>
           {icon && (
             <div className="mb-4 grid size-11 place-items-center rounded-full bg-accent-soft text-accent-text [&>svg]:size-5">
               {icon}
@@ -73,6 +87,7 @@ export function Dialog({
   description,
   children,
   className,
+  returnFocusTo,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -80,12 +95,13 @@ export function Dialog({
   description?: ReactNode;
   children: ReactNode;
   className?: string;
+  returnFocusTo?: string;
 }) {
   return (
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Portal>
         <D.Overlay className={overlay} />
-        <D.Content className={cn(panel, className)}>
+        <D.Content className={cn(panel, className)} onCloseAutoFocus={focusTarget(returnFocusTo)}>
           <D.Title className="text-lg font-semibold">{title}</D.Title>
           {description ? (
             <D.Description className="mt-1.5 text-sm leading-relaxed text-fg-muted">{description}</D.Description>

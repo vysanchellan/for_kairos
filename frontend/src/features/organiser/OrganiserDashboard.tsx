@@ -89,7 +89,7 @@ function OrganiserDashboard() {
             value={filter}
             onValueChange={(v) => v && setFilter(v as EventStatus | "all")}
             aria-label="Filter by status"
-            className="-mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:rounded-lg sm:border sm:border-border sm:bg-surface-muted sm:p-1 sm:px-1"
+            className="-mx-4 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:rounded-lg sm:border sm:border-border sm:bg-surface-muted sm:p-1 sm:px-1"
           >
             {FILTERS.map((f) => (
               <ToggleGroup.Item
