@@ -5,7 +5,8 @@
  *
  * Light and dark themes redefine the same variables, so every component gets
  * dark mode for free. Contrast pairs were checked against WCAG 2.2 AA:
- *   fg on canvas 17.1:1 · fg-muted 7.2:1 · fg-subtle 4.7:1 · white on accent 6.3:1
+ *   light: fg 17.1:1 · fg-muted ≥6.9:1 · fg-subtle ≥4.8:1 (on every surface) · white on accent 6.3:1
+ *   dark:  fg 15.7:1 · fg-muted ≥7.6:1 · fg-subtle ≥5.1:1 · accent-fg on accent 6.5:1
  */
 
 @import "@fontsource-variable/geist";
@@ -23,7 +24,7 @@
 
   --fg: #0f172a;
   --fg-muted: #475569;
-  --fg-subtle: #64748b;
+  --fg-subtle: #5b6b7f;
 
   --accent: #4f46e5;
   --accent-hover: #4338ca;

@@ -49,7 +49,7 @@ export function Field({
 }
 
 const control =
-  "block w-full rounded-md border bg-surface px-3 text-[15px] text-fg shadow-xs transition-colors duration-150 placeholder:text-fg-subtle/80 hover:border-border-strong focus:border-accent focus:outline-none focus:ring-3 focus:ring-accent/20 disabled:opacity-60 sm:text-sm";
+  "block w-full rounded-md border bg-surface px-3 text-[15px] text-fg shadow-xs transition-colors duration-150 placeholder:text-fg-subtle hover:border-border-strong focus:border-accent focus:outline-none focus:ring-3 focus:ring-accent/20 disabled:opacity-60 sm:text-sm";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(
   function Input({ className, invalid, ...props }, ref) {
