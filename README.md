@@ -2,6 +2,8 @@
 
 Visitors browse community events and register interest anonymously. Organisers create and manage their events. Administrators review new events and publish them.
 
+> **New here?** Start with [`GETTING_STARTED.md`](GETTING_STARTED.md): a step-by-step guide from installing Python to running every demo scenario.
+
 This is a single **Django + Django REST Framework** service (a modular monolith) with a **React + TypeScript** frontend, backed by **SQLite**.
 
 | | |
@@ -10,6 +12,7 @@ This is a single **Django + Django REST Framework** service (a modular monolith)
 | **API** | http://localhost:8000/api/v1/ |
 | **API docs (Swagger UI)** | http://localhost:8000/api/docs/ |
 | **Tests** | 135 backend tests (`pytest`), including a real multi-threaded race for the last spot |
+| **First time?** | [`GETTING_STARTED.md`](GETTING_STARTED.md): install, run, tour, troubleshooting |
 | **Deep dive** | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): request lifecycle, sequence diagrams, error catalogue, ADRs |
 
 ---
