@@ -35,9 +35,10 @@ if not SECRET_KEY:
     # Nothing in this app relies on the key surviving a restart (no sessions,
     # no signed cookies), so a per-process random key is a safe default.
     SECRET_KEY = get_random_secret_key()
-    logging.getLogger(__name__).warning(
-        "DJANGO_SECRET_KEY is not set; using a random key for this process."
-    )
+    if not DEBUG:
+        logging.getLogger(__name__).warning(
+            "DJANGO_SECRET_KEY is not set; using a random key for this process."
+        )
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
