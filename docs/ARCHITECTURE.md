@@ -589,6 +589,11 @@ It adds `X-Demo-Role`, `X-Demo-Organiser-Id` and `X-Request-ID`. It recognises o
 **Consequences.** It's accessible and mobile-friendly by default, with no dependency. Its look varies a little by browser.
 **Rejected.** A JS date-picker library (weight, plus accessibility work to verify).
 
+### ADR-012: Self-hosted fonts
+**Context.** It needs a modern typeface, and the platform's theme is privacy.
+**Decision.** Use `@fontsource-variable/geist` instead of Google Fonts.
+**Consequences.** No visitor IP is sent to third parties, and it works offline.
+
 ### ADR-013: Curated, bundled cover photos instead of uploads
 **Context.** The UI needs real imagery, but file uploads are out of scope, and hot-linking a CDN would leak visitor IPs.
 **Decision.** Bundle 15 free-licence Unsplash photos (two WebP widths each). Store a key per event, validated server-side, with the category's photo as the fallback.
@@ -599,11 +604,6 @@ It adds `X-Demo-Role`, `X-Demo-Organiser-Id` and `X-Request-ID`. It recognises o
 **Context.** It needs a "wow" transition from a card to its event page without a heavy animation framework for routing.
 **Decision.** React Router's `<Link viewTransition>` with a shared `view-transition-name` on the card photo and the page hero.
 **Consequences.** A native, GPU-composited morph in supporting browsers. Others simply navigate normally (progressive enhancement), and it's off under reduced motion.
-
-### ADR-012: Self-hosted fonts
-**Context.** It needs a modern typeface, and the platform's theme is privacy.
-**Decision.** Use `@fontsource-variable/geist` instead of Google Fonts.
-**Consequences.** No visitor IP is sent to third parties, and it works offline.
 
 ---
 
