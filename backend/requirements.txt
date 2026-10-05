@@ -1,0 +1,5 @@
+# Runtime dependencies. Each one is justified in docs/ARCHITECTURE.md (ADR-001).
+Django>=5.2,<5.3
+djangorestframework>=3.16,<3.17
+drf-spectacular>=0.28,<1.0
+python-dotenv>=1.0,<2.0
