@@ -65,15 +65,21 @@ def list_admin_events(*, status: str | None = None) -> QuerySet[Event]:
     )
 
 
+def resolve_event_id(reference: str) -> int:
+    """``EVT-1001`` -> primary key, or EventNotFound for anything malformed."""
+    pk = Event.reference_to_pk(reference)
+    if pk is None:
+        raise EventNotFound()
+    return pk
+
+
 def get_event_for_actor(*, reference: str, actor: Principal) -> Event:
     """Fetch one event, or raise EventNotFound if it doesn't exist *or* the actor can't see it.
 
     Answering 404 (not 403) for hidden events means a visitor can't tell an
     unpublished event apart from one that doesn't exist.
     """
-    pk = Event.reference_to_pk(reference)
-    if pk is None:
-        raise EventNotFound()
+    pk = resolve_event_id(reference)
     event = _with_counts(Event.objects.filter(visible_to(actor), pk=pk)).first()
     if event is None:
         raise EventNotFound()

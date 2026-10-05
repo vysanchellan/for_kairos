@@ -24,13 +24,13 @@ class IsOrganiser(BasePermission):
 
 
 class IsEventOwner(BasePermission):
-    """Object-level rule: the organiser must own the event they are changing."""
+    """Object-level rule: the organiser must own the event they are changing.
+
+    Combine with ``IsOrganiser``, which answers the role question first.
+    """
 
     message = "You can only change events that you organise."
     code = "NOT_EVENT_OWNER"
-
-    def has_permission(self, request, view) -> bool:
-        return request.user.is_organiser
 
     def has_object_permission(self, request, view, obj) -> bool:
         return obj.organiser_id == request.user.organiser_id

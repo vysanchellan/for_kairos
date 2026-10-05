@@ -8,6 +8,9 @@ from apps.core.views import HealthView, OrganiserDirectoryView
 api_v1 = [
     path("health/", HealthView.as_view(), name="health"),
     path("organisers/", OrganiserDirectoryView.as_view(), name="organiser-directory"),
+    path("", include("apps.events.urls")),
+    path("", include("apps.registrations.urls")),
+    path("", include("apps.activity.urls")),
 ]
 
 urlpatterns = [
