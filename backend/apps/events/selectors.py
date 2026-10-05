@@ -107,3 +107,14 @@ def admin_stats() -> dict[str, int]:
         published=Count("id", filter=Q(status=EventStatus.PUBLISHED)),
         changes_requested=Count("id", filter=Q(status=EventStatus.REJECTED)),
     )
+
+
+def public_stats() -> dict[str, int]:
+    """Headline numbers for the Discover hero. Only published events count."""
+    published = Event.objects.filter(status=EventStatus.PUBLISHED)
+    upcoming = published.filter(starts_at__gt=clock.now())
+    return {
+        "upcoming_events": upcoming.count(),
+        "registrations": _with_counts(published).aggregate(total=Sum("registered_count"))["total"] or 0,
+        "organisers": upcoming.values("organiser_id").distinct().count(),
+    }

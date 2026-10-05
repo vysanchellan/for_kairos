@@ -7,7 +7,7 @@ import { Link } from "react-router";
 import { PageHeader, StatTile } from "@/components/ui/PageHeader";
 import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/States";
-import { DateBlock, StatusBadge } from "@/features/events/components/EventBits";
+import { EventThumb, StatusBadge } from "@/features/events/components/EventBits";
 import { RoleGate } from "@/features/role/RoleGate";
 import type { CommunityEvent } from "@/lib/api/types";
 import { formatRelative, formatShortDateTime, pluralise } from "@/lib/format";
@@ -146,7 +146,7 @@ function ReviewRow({ event }: { event: CommunityEvent }) {
   return (
     <article className="rounded-xl border border-border bg-surface p-4 shadow-xs sm:p-5">
       <div className="flex gap-3.5">
-        <DateBlock iso={event.starts_at} />
+        <EventThumb event={event} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={event.status} />

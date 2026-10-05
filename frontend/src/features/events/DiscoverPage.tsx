@@ -1,4 +1,5 @@
-import { CalendarSearch, Search, ShieldCheck, X } from "lucide-react";
+import { CalendarSearch, Search, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { Switch, ToggleGroup } from "radix-ui";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -10,11 +11,14 @@ import type { PublicEventFilters } from "@/lib/api/endpoints";
 import type { EventCategory } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 import { pluralise } from "@/lib/format";
+import { ease } from "@/lib/motion";
 
+import { DiscoverHero } from "./components/DiscoverHero";
 import { EventCard, EventCardSkeleton } from "./components/EventCard";
+import { HowItWorks } from "./components/HowItWorks";
+import { UpcomingMarquee } from "./components/UpcomingMarquee";
 import { CATEGORIES } from "./categories";
 import { usePublicEvents } from "./queries";
-
 
 /** Filters live in the URL, so a filtered view can be bookmarked and shared, and Back works. */
 function useFilters() {
@@ -48,6 +52,8 @@ export default function DiscoverPage() {
   const { filters, update } = useFilters();
   const [search, setSearch] = useState(filters.q ?? "");
   const query = usePublicEvents(filters);
+  // Unfiltered upcoming events for the marquee (same cache entry as the default list).
+  const upcoming = usePublicEvents({ upcoming: true });
 
   // Debounce typing into the URL (and therefore the API) by 300ms.
   useEffect(() => {
@@ -64,33 +70,18 @@ export default function DiscoverPage() {
 
   return (
     <div>
-      <section className="relative mb-7 overflow-hidden rounded-2xl border border-border bg-surface px-5 py-7 shadow-card sm:px-8 sm:py-9">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-accent/10 blur-3xl"
-        />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-medium text-accent-text">Community events near you</p>
-            <h1 className="mt-2 text-[27px] font-semibold leading-tight tracking-tight sm:text-4xl">
-              Find something good to do this week
-            </h1>
-            <p className="mt-3 text-sm leading-relaxed text-fg-muted sm:text-base">
-              Repair cafés, open mics, sunrise yoga and more, all run by local groups. Register your interest in one
-              tap, with no account needed.
-            </p>
-          </div>
-          <p className="inline-flex items-center gap-2 self-start rounded-full border border-success/25 bg-success-soft px-3 py-1.5 text-sm font-medium text-success lg:self-end">
-            <ShieldCheck className="size-4" aria-hidden="true" />
-            Anonymous by design
+      <DiscoverHero />
+      {upcoming.data && <UpcomingMarquee events={upcoming.data.pages[0]?.results ?? []} />}
+
+      <section id="events" aria-labelledby="events-heading" className="scroll-mt-24">
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <h2 id="events-heading" className="text-xl font-semibold tracking-tight">
+            Browse events
+          </h2>
+          <p className="text-sm text-fg-subtle" aria-live="polite">
+            {query.isSuccess && (query.isPlaceholderData ? "Updating…" : pluralise(total, "event"))}
           </p>
         </div>
-      </section>
-
-      <section aria-labelledby="events-heading">
-        <h2 id="events-heading" className="sr-only">
-          Events
-        </h2>
 
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <ToggleGroup.Root
@@ -105,12 +96,20 @@ export default function DiscoverPage() {
                 key={category.value}
                 value={category.value}
                 className={cn(
-                  "h-11 shrink-0 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors sm:h-9",
+                  "relative h-11 shrink-0 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition-colors sm:h-9",
                   "border-border bg-surface text-fg-muted hover:border-border-strong hover:text-fg",
-                  "data-[state=on]:border-fg data-[state=on]:bg-fg data-[state=on]:text-canvas",
+                  "data-[state=on]:border-transparent data-[state=on]:text-canvas",
                 )}
               >
-                {category.label}
+                {(filters.category ?? "all") === category.value && (
+                  <motion.span
+                    layoutId="category-pill"
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded-full bg-fg"
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                  />
+                )}
+                <span className="relative">{category.label}</span>
               </ToggleGroup.Item>
             ))}
           </ToggleGroup.Root>
@@ -146,9 +145,6 @@ export default function DiscoverPage() {
           </div>
         </div>
 
-        <p className="mb-4 text-sm text-fg-subtle" aria-live="polite">
-          {query.isSuccess && (query.isPlaceholderData ? "Updating…" : pluralise(total, "event"))}
-        </p>
 
         {query.isPending ? (
           <LoadingRegion label="Loading events">
@@ -187,15 +183,25 @@ export default function DiscoverPage() {
           <>
             <ul
               className={cn(
-                "grid gap-4 transition-opacity sm:grid-cols-2 lg:grid-cols-3",
+                "grid gap-5 transition-opacity sm:grid-cols-2 lg:grid-cols-3",
                 query.isPlaceholderData && "opacity-60",
               )}
             >
-              {events.map((event) => (
-                <li key={event.id}>
-                  <EventCard event={event} />
-                </li>
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {events.map((event, i) => (
+                  <motion.li
+                    key={event.id}
+                    layout
+                    initial={{ opacity: 0, y: 28, scale: 0.97 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.2 } }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.55, ease, delay: (i % 3) * 0.08 }}
+                  >
+                    <EventCard event={event} />
+                  </motion.li>
+                ))}
+              </AnimatePresence>
             </ul>
             {query.hasNextPage && (
               <div className="mt-8 flex justify-center">
@@ -207,6 +213,8 @@ export default function DiscoverPage() {
           </>
         )}
       </section>
+
+      <HowItWorks />
     </div>
   );
 }

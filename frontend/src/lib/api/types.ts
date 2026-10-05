@@ -25,6 +25,8 @@ export interface CommunityEvent {
   category: EventCategory;
   category_label: string;
   location: string;
+  /** Key of a bundled cover photo; "" means the category default. */
+  cover_image: string;
   starts_at: string;
   capacity: number;
   registered_count: number;
@@ -52,6 +54,7 @@ export interface EventInput {
   description: string;
   category: EventCategory;
   location: string;
+  cover_image: string;
   starts_at: string;
   capacity: number;
 }
@@ -88,6 +91,12 @@ export interface EventStats {
   published: number;
   changes_requested: number;
   registrations?: number;
+}
+
+export interface PublicStats {
+  upcoming_events: number;
+  registrations: number;
+  organisers: number;
 }
 
 export interface ApiErrorBody {

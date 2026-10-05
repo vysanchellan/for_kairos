@@ -1,14 +1,19 @@
 /** Small, event-specific building blocks reused across visitor, organiser and admin views. */
 
 import { CircleHelp } from "lucide-react";
+import { motion } from "motion/react";
 
 import { Badge, type Tone } from "@/components/ui/Badge";
 import { Tooltip } from "@/components/ui/Tooltip";
 import type { CommunityEvent, EventStatus } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 import { formatDateBlock } from "@/lib/format";
+import { ease } from "@/lib/motion";
+
+import { CoverImage } from "@/components/motion/primitives";
 
 import { capacityLabel, capacityState } from "../capacity";
+import { coverFor } from "../covers";
 
 export function DateBlock({ iso, size = "md" }: { iso: string; size?: "md" | "lg" }) {
   const { month, day, weekday } = formatDateBlock(iso);
@@ -55,9 +60,13 @@ export function CapacityMeter({
         aria-valuetext={`${event.registered_count} of ${event.capacity} spots taken. ${capacityLabel(event)}.`}
         className={cn("overflow-hidden rounded-full bg-surface-sunken", size === "lg" ? "h-2.5" : "h-1.5")}
       >
-        <div
-          className={cn("h-full rounded-full transition-[width] duration-500 ease-out", bar)}
+        <motion.div
+          className={cn("h-full origin-left rounded-full transition-[width] duration-500 ease-out", bar)}
           style={{ width: `${Math.max(percent, event.registered_count > 0 ? 3 : 0)}%` }}
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, ease, delay: 0.15 }}
         />
       </div>
       {showCounts && (
@@ -105,5 +114,21 @@ export function StatusBadge({ status, explain = false }: { status: EventStatus; 
         {badge}
       </button>
     </Tooltip>
+  );
+}
+
+/** A small cover photo with the date on it, for list rows (organiser and admin views). */
+export function EventThumb({ event }: { event: Pick<CommunityEvent, "category" | "cover_image" | "starts_at"> }) {
+  const cover = coverFor(event);
+  const { month, day } = formatDateBlock(event.starts_at);
+  return (
+    <div className="relative shrink-0 self-start overflow-hidden rounded-xl" aria-hidden="true">
+      <CoverImage cover={cover} sizes="120px" className="h-16 w-20 sm:h-[72px] sm:w-24" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <span className="absolute bottom-1 left-1.5 text-white">
+        <span className="block text-[9px] font-semibold tracking-wider text-white/80">{month}</span>
+        <span className="block text-lg font-semibold leading-none tabular-nums">{day}</span>
+      </span>
+    </div>
   );
 }

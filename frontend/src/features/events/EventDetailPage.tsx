@@ -1,8 +1,9 @@
 import { ArrowLeft, Building2, CalendarDays, Clock, Eye, MapPin, Pencil, SearchX } from "lucide-react";
+import { motion, useScroll, useTransform } from "motion/react";
 import type { ReactNode } from "react";
 import { Link, useParams } from "react-router";
 
-import { Badge } from "@/components/ui/Badge";
+import { CountUp, CoverImage } from "@/components/motion/primitives";
 import { Button } from "@/components/ui/Button";
 import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { Callout, EmptyState, ErrorState } from "@/components/ui/States";
@@ -13,9 +14,11 @@ import { ROLE_META } from "@/features/role/roles";
 import { useViewer } from "@/features/role/viewer-context";
 import { ApiError } from "@/lib/api/client";
 import type { CommunityEvent } from "@/lib/api/types";
-import { formatLongDate, formatTime, timeZoneLabel } from "@/lib/format";
+import { formatDateBlock, formatLongDate, formatTime, timeZoneLabel } from "@/lib/format";
+import { ease } from "@/lib/motion";
 
 import { CapacityMeter, StatusBadge } from "./components/EventBits";
+import { coverFor, coverTransitionName } from "./covers";
 import { useEvent } from "./queries";
 
 export default function EventDetailPage() {
@@ -28,6 +31,7 @@ export default function EventDetailPage() {
     <div className="mx-auto max-w-5xl">
       <Link
         to={back.to}
+        viewTransition
         className="mb-5 inline-flex h-11 items-center gap-1.5 rounded-md text-sm font-medium text-fg-muted hover:text-fg sm:h-auto"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -64,18 +68,7 @@ function EventDetail({ event }: { event: CommunityEvent }) {
 
   return (
     <article>
-      <header>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge tone="accent">{event.category_label}</Badge>
-          {event.status !== "PUBLISHED" && <StatusBadge status={event.status} explain />}
-          <span className="font-mono text-xs text-fg-subtle">{event.id}</span>
-        </div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{event.title}</h1>
-        <p className="mt-2 flex items-center gap-1.5 text-fg-muted">
-          <Building2 className="size-4" aria-hidden="true" />
-          Hosted by {event.organiser.name}
-        </p>
-      </header>
+      <EventHero event={event} />
 
       {event.status === "PENDING_REVIEW" && (isOwner || viewer.role === "admin") && (
         <Callout tone="warning" icon={<Eye />} title="Waiting for review" className="mt-6">
@@ -123,7 +116,7 @@ function EventDetail({ event }: { event: CommunityEvent }) {
             <div className="mb-1 flex items-baseline justify-between">
               <span className="text-sm font-medium">Spots</span>
               <span className="text-sm tabular-nums text-fg-muted">
-                <span className="text-2xl font-semibold text-fg">{event.registered_count}</span> / {event.capacity}{" "}
+                <CountUp value={event.registered_count} className="text-2xl font-semibold text-fg" /> / {event.capacity}{" "}
                 taken
               </span>
             </div>
@@ -181,6 +174,70 @@ function ActionsFor({ event, isOwner }: { event: CommunityEvent; isOwner: boolea
         Switch to Visitor to try it
       </button>
     </div>
+  );
+}
+
+/** Photo hero with a gentle scroll parallax; its image shares a view-transition name with the event card. */
+function EventHero({ event }: { event: CommunityEvent }) {
+  const cover = coverFor(event);
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 500], [0, 90]);
+  const scale = useTransform(scrollY, [0, 500], [1, 1.08]);
+  const date = formatDateBlock(event.starts_at);
+
+  return (
+    <header className="relative isolate -mx-4 overflow-hidden bg-slate-950 text-white sm:mx-0 sm:rounded-3xl">
+      <motion.div className="absolute inset-0 -z-10" style={{ y, scale }} aria-hidden="true">
+        <CoverImage
+          cover={cover}
+          alt=""
+          priority
+          sizes="(min-width: 1024px) 1024px, 100vw"
+          transitionName={coverTransitionName(event.id)}
+          className="h-full w-full"
+        />
+      </motion.div>
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-slate-950/10" />
+
+      <div className="flex min-h-[320px] flex-col justify-end gap-4 p-6 sm:min-h-[420px] sm:p-10">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease, delay: 0.15 }}
+          className="flex items-end justify-between gap-6"
+        >
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-medium ring-1 ring-white/25 backdrop-blur-md">
+                {event.category_label}
+              </span>
+              {event.status !== "PUBLISHED" && <StatusBadge status={event.status} explain />}
+              <span className="font-mono text-xs text-white/60">{event.id}</span>
+            </div>
+            <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">{event.title}</h1>
+            <p className="mt-2 flex items-center gap-1.5 text-white/80">
+              <Building2 className="size-4" aria-hidden="true" />
+              Hosted by {event.organiser.name}
+            </p>
+          </div>
+          <div
+            aria-hidden="true"
+            className="hidden shrink-0 flex-col items-center rounded-2xl bg-white/10 px-4 py-2.5 text-center ring-1 ring-white/20 backdrop-blur-md sm:flex"
+          >
+            <span className="text-xs font-semibold tracking-wider text-indigo-200">{date.month}</span>
+            <span className="text-3xl font-semibold leading-none tabular-nums">{date.day}</span>
+            <span className="mt-0.5 text-xs text-white/70">{date.weekday}</span>
+          </div>
+        </motion.div>
+      </div>
+      <p className="absolute right-4 top-3 text-[10px] text-white/50">
+        Photo:{" "}
+        <a href={cover.creditUrl} target="_blank" rel="noreferrer" className="hover:text-white/90 hover:underline">
+          {cover.author}
+        </a>{" "}
+        / Unsplash
+      </p>
+    </header>
   );
 }
 

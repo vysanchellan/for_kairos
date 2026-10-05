@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { PageHeader, StatTile } from "@/components/ui/PageHeader";
 import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { Callout, EmptyState, ErrorState } from "@/components/ui/States";
-import { CapacityMeter, DateBlock, StatusBadge } from "@/features/events/components/EventBits";
+import { CapacityMeter, EventThumb, StatusBadge } from "@/features/events/components/EventBits";
 import { RoleGate } from "@/features/role/RoleGate";
 import { organiserName, useOrganisers } from "@/features/role/useSwitchViewer";
 import { useViewer } from "@/features/role/viewer-context";
@@ -162,7 +162,7 @@ function OrganiserEventRow({ event }: { event: CommunityEvent }) {
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex min-w-0 flex-1 gap-3.5">
-          <DateBlock iso={event.starts_at} />
+          <EventThumb event={event} />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={event.status} explain />

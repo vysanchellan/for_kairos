@@ -116,6 +116,23 @@ SEED_EVENTS: list[SeedEvent] = [
 ]
 
 
+#: Which bundled cover photo each seeded event uses.
+SEED_COVERS: dict[str, str] = {
+    "Riverside Litter Pick & Picnic": "litter-pick",
+    "Community Repair Café": "repair-cafe",
+    "Beginners' Sourdough Workshop": "sourdough",
+    "Sunrise Yoga in Millbrook Park": "yoga-park",
+    "Neighbourhood Seed Swap": "seedlings",
+    "Intro to Home Energy Saving": "lightbulb",
+    "Open Mic at the Lantern": "open-mic",
+    "Watercolour Sketching Walk": "watercolour",
+    "Code Club for Curious Adults": "code-club",
+    "Board Game Night": "board-games",
+    "Zine-Making Afternoon": "craft-table",
+    "Night Sky Photography Basics": "night-sky",
+}
+
+
 class Command(BaseCommand):
     help = "Seed fictional demo events, registrations and activity."
 
@@ -164,6 +181,7 @@ class Command(BaseCommand):
                 description=spec.description,
                 category=spec.category,
                 location=spec.location,
+                cover_image=SEED_COVERS.get(spec.title, ""),
                 starts_at=starts_at,
                 capacity=spec.capacity,
             )

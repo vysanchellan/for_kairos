@@ -464,6 +464,28 @@ It adds `X-Demo-Role`, `X-Demo-Organiser-Id` and `X-Request-ID`. It recognises o
 | `EventCard`, `DateBlock`, `CapacityMeter` | `role="meter"` with a spoken `aria-valuetext` ("18 of 20 spots taken. Only 2 spots left.") |
 | `RoleSwitcher`, `RoleIntro`, `RoleGate` | |
 
+### Imagery and motion
+
+**Photography.** Each event has a cover photo chosen from 15 bundled Unsplash images (`src/features/events/covers.ts`). The API stores only a key (`"sourdough"`), checked against `CoverImage` choices and a DB `CHECK` constraint, so no URL or file path can ever be injected. `coverFor(event)` falls back to the category's default. Images are WebP at 800px and 1600px, served with `srcset`/`sizes`, lazy-loaded below the fold and eager with `fetchpriority=high` for heroes. While loading, a placeholder in the photo's average colour shows, then the image fades in from a slight blur (`CoverImage`).
+
+**Motion inventory** (all in `src/components/motion/primitives.tsx` or next to the feature that uses it):
+
+| Effect | Where | How |
+| --- | --- | --- |
+| Ken Burns crossfade slideshow + cursor parallax | Discover hero | `AnimatePresence` crossfade, a slow `scale` per slide, a spring-smoothed pointer offset |
+| Word-by-word headline, count-up stats | Hero, event page, ticket | `StaggerWords` (masked rise), `CountUp` (animates once in view) |
+| Infinite "Coming up" marquee | Discover | CSS keyframes over a duplicated list; pauses on hover/focus |
+| Sliding category pill | Discover filters | Shared `layoutId` between chips |
+| Staggered reveal + layout reflow | Event grid | `whileInView`, `layout`, `AnimatePresence mode="popLayout"` on filter changes |
+| 3D tilt with cursor-following glare | Event cards | `TiltCard`: springs on rotateX/Y plus a radial-gradient glare; mouse/trackpad only |
+| Card → page photo morph | Card → event page (and back) | View Transitions API via `<Link viewTransition>`; card photo and hero share a `view-transition-name` |
+| Scroll parallax | Event hero, "host an event" band | `useScroll` + `useTransform` |
+| Scroll-linked progress line | "How it works" | `scrollYProgress` → `scaleX` |
+| Ticket + confetti | Registration success | Spring-in ticket; 42 particles arcing up and falling |
+| Capacity bar fill, page fade-in | Everywhere | `scaleX` on view; a 350ms fade on route change |
+
+**Reduced motion.** `<MotionConfig reducedMotion="user">` disables transform animations globally. Effects that aren't plain transforms check `useReducedMotion()` themselves (slideshow, parallax, tilt, confetti, count-up), and CSS animations and view transitions are switched off in a `prefers-reduced-motion` media query. The result is a fully static, still-polished page.
+
 ### Accessibility decisions
 
 - Semantic landmarks (`header`, `nav`, `main`, `footer`, `aside`), one `h1` per page, a skip link, and focus moved sensibly after actions (the queue heading after publishing, the first invalid field after a failed submit).
@@ -566,6 +588,17 @@ It adds `X-Demo-Role`, `X-Demo-Organiser-Id` and `X-Request-ID`. It recognises o
 **Decision.** The native input, styled with the tokens, plus a hint showing the viewer's zone ("GMT+2, Africa/Johannesburg"). Values are converted to UTC ISO strings before sending.
 **Consequences.** It's accessible and mobile-friendly by default, with no dependency. Its look varies a little by browser.
 **Rejected.** A JS date-picker library (weight, plus accessibility work to verify).
+
+### ADR-013: Curated, bundled cover photos instead of uploads
+**Context.** The UI needs real imagery, but file uploads are out of scope, and hot-linking a CDN would leak visitor IPs.
+**Decision.** Bundle 15 free-licence Unsplash photos (two WebP widths each). Store a key per event, validated server-side, with the category's photo as the fallback.
+**Consequences.** It looks like a real product, needs no storage or moderation, and makes no third-party requests. Organisers can't use their own photos, and the repo grows by about 5.5 MB.
+**Rejected.** Uploads (out of scope, plus security and moderation work); hot-linking Unsplash (privacy); AI-generated images (inconsistent realism).
+
+### ADR-014: View Transitions for card-to-page continuity
+**Context.** It needs a "wow" transition from a card to its event page without a heavy animation framework for routing.
+**Decision.** React Router's `<Link viewTransition>` with a shared `view-transition-name` on the card photo and the page hero.
+**Consequences.** A native, GPU-composited morph in supporting browsers. Others simply navigate normally (progressive enhancement), and it's off under reduced motion.
 
 ### ADR-012: Self-hosted fonts
 **Context.** It needs a modern typeface, and the platform's theme is privacy.

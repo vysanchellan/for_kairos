@@ -278,3 +278,46 @@ class TestAdminEndpoints:
         assert feed[1]["message"] == f"Event {event.reference} was published."
 
         assert as_role("organiser", "organiser-1").get("/api/v1/admin/activity/").status_code == 403
+
+
+class TestCoverImages:
+    def test_cover_image_is_stored_and_returned(self, as_role, now):
+        response = as_role("organiser", "organiser-1").post(
+            "/api/v1/events/", valid_payload(now, cover_image="seedlings")
+        )
+        assert response.status_code == 201
+        assert response.json()["cover_image"] == "seedlings"
+
+    def test_cover_image_defaults_to_blank(self, as_role, now):
+        response = as_role("organiser", "organiser-1").post("/api/v1/events/", valid_payload(now))
+        assert response.json()["cover_image"] == ""
+
+    @pytest.mark.parametrize("cover", ["https://evil.example/x.png", "../etc/passwd", "unknown"])
+    def test_only_bundled_cover_keys_are_accepted(self, as_role, now, cover):
+        """Covers are keys into a fixed set, never URLs, so nothing external can be injected."""
+        response = as_role("organiser", "organiser-1").post(
+            "/api/v1/events/", valid_payload(now, cover_image=cover)
+        )
+        assert response.status_code == 400
+        assert "cover_image" in response.json()["fields"]
+
+    def test_owner_can_change_the_cover(self, as_role, make_event):
+        event = make_event()
+        response = as_role("organiser", "organiser-1").patch(
+            f"/api/v1/events/{event.reference}/", {"cover_image": "night-sky"}
+        )
+        assert response.json()["cover_image"] == "night-sky"
+
+
+class TestPublicStats:
+    def test_counts_only_published_upcoming_events(self, api, make_event, fill, now):
+        live = make_event(status=EventStatus.PUBLISHED)
+        make_event(status=EventStatus.PUBLISHED, organiser_id="organiser-2")
+        make_event(status=EventStatus.PENDING_REVIEW)
+        make_event(status=EventStatus.PUBLISHED, starts_at=now - timedelta(days=1))
+        fill(live, 4)
+        assert api.get("/api/v1/stats/").json() == {
+            "upcoming_events": 2,
+            "registrations": 4,
+            "organisers": 2,
+        }

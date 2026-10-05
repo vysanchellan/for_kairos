@@ -1,6 +1,7 @@
 import { CalendarPlus, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet, ScrollRestoration, useNavigation } from "react-router";
+import { motion } from "motion/react";
+import { Link, NavLink, Outlet, ScrollRestoration, useLocation, useNavigation } from "react-router";
 
 import { Button } from "@/components/ui/Button";
 import { Toaster } from "@/components/ui/Toaster";
@@ -10,6 +11,7 @@ import { useViewer } from "@/features/role/viewer-context";
 import { ThemeMenu } from "@/features/theme/theme";
 import type { Role } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
+import { ease } from "@/lib/motion";
 
 const NAV: Record<Role, Array<{ to: string; label: string; end?: boolean }>> = {
   visitor: [{ to: "/", label: "Discover", end: true }],
@@ -79,6 +81,7 @@ function useOnline() {
 export function Layout() {
   const { viewer } = useViewer();
   const navigation = useNavigation();
+  const location = useLocation();
   const online = useOnline();
 
   return (
@@ -132,7 +135,14 @@ export function Layout() {
       )}
 
       <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 focus:outline-none sm:px-6 sm:pt-8">
-        <Outlet />
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease }}
+        >
+          <Outlet />
+        </motion.div>
       </main>
 
       <footer className="border-t border-border">

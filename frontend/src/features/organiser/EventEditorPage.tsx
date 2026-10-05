@@ -23,6 +23,7 @@ import type { CommunityEvent, EventCategory, EventInput } from "@/lib/api/types"
 import { toFriendlyError } from "@/lib/errors";
 import { fromLocalInputValue, timeZoneLabel, toLocalInputValue, userTimeZone } from "@/lib/format";
 
+import { CoverPicker } from "./CoverPicker";
 import { useSaveEvent } from "./queries";
 
 const LIMITS = { title: 120, description: 2000, location: 120, capacity: 10_000 } as const;
@@ -32,6 +33,7 @@ interface FormValues {
   description: string;
   category: EventCategory;
   location: string;
+  coverImage: string; // "" = the category's default cover
   startsAt: string; // datetime-local value, in the viewer's local time
   capacity: number;
 }
@@ -42,6 +44,7 @@ const FIELD_MAP: Record<string, keyof FormValues> = {
   description: "description",
   category: "category",
   location: "location",
+  cover_image: "coverImage",
   starts_at: "startsAt",
   capacity: "capacity",
 };
@@ -119,6 +122,7 @@ function defaultsFrom(event?: CommunityEvent): FormValues {
     description: event?.description ?? "",
     category: event?.category ?? "community",
     location: event?.location ?? "",
+    coverImage: event?.cover_image ?? "",
     startsAt: event ? toLocalInputValue(event.starts_at) : "",
     capacity: event?.capacity ?? Number.NaN,
   };
@@ -168,6 +172,7 @@ function EventEditor({ event }: { event?: CommunityEvent }) {
       description: form.description.trim(),
       category: form.category,
       location: form.location.trim(),
+      cover_image: form.coverImage,
       starts_at: fromLocalInputValue(form.startsAt),
       capacity: form.capacity,
     };
@@ -215,6 +220,8 @@ function EventEditor({ event }: { event?: CommunityEvent }) {
   const previewEvent = {
     id: event?.id ?? "EVT-preview",
     title: values.title.trim() || "Your event title",
+    category: values.category,
+    cover_image: values.coverImage,
     category_label: CATEGORIES.find((c) => c.value === values.category)?.label ?? "Community",
     location: values.location.trim(),
     starts_at: values.startsAt ? fromLocalInputValue(values.startsAt) : sampleStart,
@@ -340,6 +347,19 @@ function EventEditor({ event }: { event?: CommunityEvent }) {
               })}
             />
           </Field>
+
+          <Controller
+            control={control}
+            name="coverImage"
+            render={({ field }) => (
+              <div>
+                <CoverPicker value={field.value} onChange={field.onChange} category={values.category} />
+                {errors.coverImage?.message && (
+                  <p className="mt-1.5 text-sm text-danger">{errors.coverImage.message}</p>
+                )}
+              </div>
+            )}
+          />
 
           <Field id="location" label="Location" optional error={errors.location?.message}>
             <Input

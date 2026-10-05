@@ -25,7 +25,9 @@ from apps.events.models import Event, EventCategory, EventStatus
 logger = logging.getLogger(__name__)
 
 #: Fields an organiser may change. Status is deliberately absent; it only moves via the state machine.
-EDITABLE_FIELDS = frozenset({"title", "description", "category", "location", "starts_at", "capacity"})
+EDITABLE_FIELDS = frozenset(
+    {"title", "description", "category", "location", "cover_image", "starts_at", "capacity"}
+)
 
 
 def _lock_event(event_id: int) -> Event:
@@ -55,6 +57,7 @@ def create_event(
     description: str = "",
     category: str = EventCategory.COMMUNITY,
     location: str = "",
+    cover_image: str = "",
 ) -> Event:
     """Create an event owned by the acting organiser. New events always await review."""
     if not actor.is_organiser:
@@ -66,6 +69,7 @@ def create_event(
         description=description,
         category=category,
         location=location,
+        cover_image=cover_image,
         starts_at=starts_at,
         capacity=capacity,
         organiser_id=actor.organiser_id,

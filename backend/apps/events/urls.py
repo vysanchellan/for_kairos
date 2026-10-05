@@ -4,6 +4,7 @@ from apps.events import views
 
 urlpatterns = [
     path("events/", views.EventCollectionView.as_view(), name="event-list"),
+    path("stats/", views.PublicStatsView.as_view(), name="public-stats"),
     path("events/<str:reference>/", views.EventDetailView.as_view(), name="event-detail"),
     path("organiser/events/", views.OrganiserEventListView.as_view(), name="organiser-event-list"),
     path("organiser/stats/", views.OrganiserStatsView.as_view(), name="organiser-stats"),

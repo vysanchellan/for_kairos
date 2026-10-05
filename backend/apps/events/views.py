@@ -19,6 +19,7 @@ from apps.events.serializers import (
     EventSerializer,
     EventStatsSerializer,
     EventWriteSerializer,
+    PublicStatsSerializer,
     RejectEventSerializer,
     StatusQuerySerializer,
 )
@@ -60,6 +61,16 @@ class EventCollectionView(GenericAPIView):
             status=status.HTTP_201_CREATED,
             headers={"Location": f"/api/v1/events/{event.reference}/"},
         )
+
+
+class PublicStatsView(GenericAPIView):
+    """Headline numbers for the Discover page (published events only)."""
+
+    permission_classes = [AllowAny]
+
+    @extend_schema(summary="Public headline numbers", responses={200: PublicStatsSerializer})
+    def get(self, request):
+        return Response(selectors.public_stats())
 
 
 class EventDetailView(GenericAPIView):

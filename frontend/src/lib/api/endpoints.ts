@@ -11,6 +11,7 @@ import type {
   EventStatus,
   Organiser,
   Paginated,
+  PublicStats,
   RegistrationResult,
 } from "./types";
 
@@ -42,6 +43,7 @@ export const queryKeys = {
   adminStats: () => ["stats", "admin"] as const,
   activity: (kind?: ActivityKind) => ["activity", kind ?? "all"] as const,
   organisers: () => ["organisers"] as const,
+  publicStats: () => ["stats", "public"] as const,
 };
 
 export const api = {
@@ -84,6 +86,8 @@ export const api = {
 
   listActivity: (kind: ActivityKind | undefined, page: number, signal?: AbortSignal) =>
     apiRequest<Paginated<ActivityEntry>>(`/admin/activity/${query({ kind, page, page_size: 20 })}`, { signal }),
+
+  publicStats: (signal?: AbortSignal) => apiRequest<PublicStats>("/stats/", { signal }),
 
   listOrganisers: (signal?: AbortSignal) => apiRequest<Organiser[]>("/organisers/", { signal }),
 };

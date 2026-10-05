@@ -28,6 +28,30 @@ class EventCategory(models.TextChoices):
     LEARNING = "learning", "Learning"
 
 
+class CoverImage(models.TextChoices):
+    """A curated set of cover photos bundled with the frontend.
+
+    Organisers pick one rather than uploading a file (uploads are out of scope),
+    so the API only ever stores a short key, never an image or a URL.
+    """
+
+    REPAIR_CAFE = "repair-cafe", "Workshop tools"
+    SOURDOUGH = "sourdough", "Fresh bread"
+    YOGA_PARK = "yoga-park", "Yoga in the park"
+    OPEN_MIC = "open-mic", "Stage microphone"
+    LITTER_PICK = "litter-pick", "Riverside clean-up"
+    SEEDLINGS = "seedlings", "Seedlings"
+    WATERCOLOUR = "watercolour", "Watercolour painting"
+    CODE_CLUB = "code-club", "Laptop glow"
+    BOARD_GAMES = "board-games", "Board game night"
+    NIGHT_SKY = "night-sky", "Starry sky"
+    CRAFT_TABLE = "craft-table", "Craft table"
+    GARDEN_BEDS = "garden-beds", "Garden beds"
+    LIGHTBULB = "lightbulb", "Light bulb"
+    MARKET_HALL = "market-hall", "Busy market"
+    STRING_LIGHTS = "string-lights", "String lights"
+
+
 class Event(models.Model):
     """A community event.
 
@@ -46,6 +70,12 @@ class Event(models.Model):
         max_length=20, choices=EventCategory.choices, default=EventCategory.COMMUNITY
     )
     location = models.CharField(max_length=LOCATION_MAX_LENGTH, blank=True)
+    cover_image = models.CharField(
+        max_length=32,
+        choices=CoverImage.choices,
+        blank=True,
+        help_text="Key of a bundled cover photo. Blank means the category's default.",
+    )
     starts_at = models.DateTimeField()
     capacity = models.PositiveIntegerField()
     status = models.CharField(
@@ -72,6 +102,10 @@ class Event(models.Model):
                 condition=Q(category__in=EventCategory.values), name="event_category_valid"
             ),
             models.CheckConstraint(condition=~Q(title=""), name="event_title_not_empty"),
+            models.CheckConstraint(
+                condition=Q(cover_image="") | Q(cover_image__in=CoverImage.values),
+                name="event_cover_image_valid",
+            ),
         ]
         indexes = [
             # The visitor list: WHERE status = 'PUBLISHED' ORDER BY starts_at

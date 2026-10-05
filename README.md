@@ -9,7 +9,7 @@ This is a single **Django + Django REST Framework** service (a modular monolith)
 | **Frontend** | http://localhost:5173 |
 | **API** | http://localhost:8000/api/v1/ |
 | **API docs (Swagger UI)** | http://localhost:8000/api/docs/ |
-| **Tests** | 128 backend tests (`pytest`), including a real multi-threaded race for the last spot |
+| **Tests** | 135 backend tests (`pytest`), including a real multi-threaded race for the last spot |
 | **Deep dive** | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): request lifecycle, sequence diagrams, error catalogue, ADRs |
 
 ---
@@ -141,9 +141,11 @@ No `django-cors-headers` (the Vite proxy makes it unnecessary), no Celery, no Do
 | Tailwind CSS | 4.3 | Utility CSS driven by a single token file (`src/styles/tokens.css`) for light and dark themes |
 | radix-ui | 1.6 | Accessible primitives (Dialog, AlertDialog, DropdownMenu, Select, Toast, Tooltip, ToggleGroup, Switch). Focus traps and ARIA aren't hand-rolled |
 | react-hook-form | 7.89 | Form state and validation; server-side field errors are mapped onto inputs |
-| motion | 14 | A few meaningful transitions (registration success, queue rows). Respects `prefers-reduced-motion` |
+| motion | 14 | Hero Ken Burns slideshow and parallax, scroll reveals, 3D card tilt, layout animations, confetti. Everything respects `prefers-reduced-motion` |
 | lucide-react | 1.52 | Consistent icon set |
 | @fontsource-variable/geist | 5.3 | Self-hosted fonts, so no third-party font requests (better for privacy) |
+
+**Photography:** 15 free-licence [Unsplash](https://unsplash.com/license) photos, bundled as WebP at two widths. Credits are in [`frontend/src/assets/covers/CREDITS.md`](frontend/src/assets/covers/CREDITS.md) and on each event page. They're self-hosted, so the browser never contacts Unsplash.
 
 ---
 
@@ -210,6 +212,7 @@ erDiagram
         text description "plain text, up to 2000"
         varchar category "community, arts, ..."
         varchar location "optional"
+        varchar cover_image "key of a bundled photo, or blank"
         datetime starts_at "must be in the future"
         int capacity "1..10000 (CHECK)"
         varchar status "PENDING_REVIEW, PUBLISHED, REJECTED"
@@ -263,6 +266,7 @@ Everything is under `/api/v1/`. Interactive docs are at **/api/docs/**. Roles ar
 | `POST /admin/events/{id}/reject/` | admin | 200 (body: optional `note`) | 404, 409 |
 | `GET /admin/activity/?kind=` | admin | 200, newest first | 403 |
 | `GET /organisers/` | anyone | 200 (demo organiser directory) | |
+| `GET /stats/` | anyone | 200 `{upcoming_events, registrations, organisers}` (Discover hero) | |
 | `GET /health/` | anyone | 200 `{"status":"ok","database":"ok"}` | 503 if the DB is unreachable |
 
 **Every error has the same shape**, and never includes stack traces, SQL, file paths or framework internals:
@@ -283,7 +287,7 @@ Validation errors add a `fields` map (`{"capacity": "Capacity must be at least 1
 
 ```bash
 cd backend
-pytest              # 128 tests, about 6 s
+pytest              # 135 tests, about 3 s
 pytest -m concurrency   # just the multi-threaded race test
 ```
 
@@ -294,7 +298,7 @@ Tests live next to each app (`apps/*/tests/`) and are named after the rule they 
 | `events/tests/test_status_lifecycle.py` | Every allowed and forbidden status transition |
 | `events/tests/test_event_services.py` | New events start pending; only organisers create and only admins publish; publishing twice is a conflict; publishing makes the event visible and records an activity entry; a started event can't be published; capacity can't drop below registrations; editing a rejected event resubmits it; `status` can't be changed through an update |
 | `events/tests/test_visibility.py` | Unpublished events are hidden from visitors in the list **and** the detail view; organisers see their own; admins see all with pending first; upcoming/category/search filters; malformed IDs return 404; counts are derived |
-| `events/tests/test_events_api.py` | HTTP contract: 201/200/400/403/404/405/409; capacity boundaries (`0`, `-1`, `"5"`, `5.5`, `true`, `null`, `10001` are rejected; `1` and `10000` are accepted); title missing, blank or over 120 characters; past or invalid dates; organisers can't self-publish through the payload; malformed JSON; HTML in titles is stored verbatim |
+| `events/tests/test_events_api.py` | HTTP contract: 201/200/400/403/404/405/409; cover images accept only bundled keys (never URLs or paths); public stats count only published upcoming events; capacity boundaries (`0`, `-1`, `"5"`, `5.5`, `true`, `null`, `10001` are rejected; `1` and `10000` are accepted); title missing, blank or over 120 characters; past or invalid dates; organisers can't self-publish through the payload; malformed JSON; HTML in titles is stored verbatim |
 | `registrations/tests/test_registration_rules.py` | Success; unpublished, full, already started and unknown events are rejected; the last spot can be taken and then nothing more; **the registration table holds exactly `{reference, event, created_at}`**; references are random |
 | `registrations/tests/test_registrations_api.py` | 201 receipt; 409 codes and the brief's exact `EVENT_FULL` message; registrations can't be listed |
 | `registrations/tests/test_concurrency.py` | **8 threads race for the last spot** against a file-based SQLite database: exactly one wins and capacity is never exceeded |
@@ -444,12 +448,13 @@ Not implemented, deliberately. See [§9](#9-assumptions-trade-offs-and-future-wo
 7. An **unpublished event's detail returns 404** to visitors (indistinguishable from not found), while **registering for it returns 409** `EVENT_NOT_PUBLISHED`, as the brief asks.
 8. **Times are stored in UTC** and shown in the viewer's local time zone, with the zone labelled in the form and on the event page.
 9. **Event categories, location and search** were added for a usable Discover page. Search is a simple case-insensitive title match.
+10. **Cover photos are chosen, not uploaded** (uploads are out of scope). Organisers pick from 15 bundled photos; the API stores only a key, validated against a fixed list and a DB `CHECK` constraint. A blank key means the category's default photo.
 
 ### Trade-offs
 
 - **SQLite plus `BEGIN IMMEDIATE`** serialises all writes. That's perfect for a demo and correct under concurrency, but it limits write throughput. On PostgreSQL the same code takes a row lock (`SELECT … FOR UPDATE`) instead.
 - **One service, not two.** The brief says a complete single service scores higher. The app boundaries (events / registrations / activity) are where a split would happen.
-- **No frontend tests** (out of scope). Correctness lives in the 128 backend tests; the UI was verified by hand.
+- **No frontend tests** (out of scope). Correctness lives in the 135 backend tests; the UI was verified by hand.
 - **Header-based demo roles** keep the demo friction-free but provide no real security.
 
 ### With more time

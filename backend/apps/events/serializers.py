@@ -10,7 +10,7 @@ from apps.core import clock
 from apps.core.demo import DEMO_ORGANISERS
 from apps.core.serializers import StrictInputSerializer, WholeNumberField
 from apps.events import domain
-from apps.events.models import MAX_CAPACITY, Event, EventCategory, EventStatus
+from apps.events.models import MAX_CAPACITY, CoverImage, Event, EventCategory, EventStatus
 
 
 class OrganiserSerializer(serializers.Serializer):
@@ -38,6 +38,7 @@ class EventSerializer(serializers.ModelSerializer):
             "category",
             "category_label",
             "location",
+            "cover_image",
             "starts_at",
             "capacity",
             "registered_count",
@@ -93,6 +94,12 @@ class EventWriteSerializer(StrictInputSerializer):
     location = serializers.CharField(
         max_length=Event.LOCATION_MAX_LENGTH, allow_blank=True, required=False
     )
+    cover_image = serializers.ChoiceField(
+        choices=CoverImage.choices,
+        allow_blank=True,
+        required=False,
+        error_messages={"invalid_choice": "Pick one of the cover photos."},
+    )
     starts_at = serializers.DateTimeField(
         error_messages={
             "required": "Choose when the event starts.",
@@ -132,6 +139,12 @@ class StatusQuerySerializer(serializers.Serializer):
 
 class RejectEventSerializer(StrictInputSerializer):
     note = serializers.CharField(max_length=280, allow_blank=True, required=False, default="")
+
+
+class PublicStatsSerializer(serializers.Serializer):
+    upcoming_events = serializers.IntegerField()
+    registrations = serializers.IntegerField()
+    organisers = serializers.IntegerField()
 
 
 class EventStatsSerializer(serializers.Serializer):
